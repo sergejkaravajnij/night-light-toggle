@@ -1,54 +1,58 @@
 # Night Light Toggle
 
-Тестовая утилита для Windows 11 на Rust.
+English | [Русский](README_ru.md)
 
-При запуске выключает ночной свет, ждёт одну секунду, включает его и завершает
-работу. Итоговое состояние — включён, независимо от исходного состояния.
-Расписание и интенсивность не изменяются. При успешном выполнении окон нет;
-при ошибке появляется MessageBox.
+A lightweight Windows 11 utility written in Rust that reapplies Night light.
 
-Запуск: `night-light-toggle.exe` в этой папке. Права администратора не нужны.
-Утилита не остаётся в фоне и не добавляет себя в автозагрузку.
+On launch, it disables Night light, waits one second, enables it, and exits.
+The final state is always enabled, regardless of the initial state.
+The schedule and intensity remain unchanged. Successful runs show no windows;
+errors appear in a MessageBox.
 
-## Автоматический запуск
+Run `night-light-toggle.exe` from this folder. Administrator privileges are not
+required. The utility does not stay in the background or register itself for
+automatic startup.
 
-В Планировщике заданий зарегистрирована задача `Night Light Refresh`:
+## Automatic startup
 
-- Через 10 секунд после входа текущего пользователя в Windows.
-- Через 10 секунд после события пробуждения System / Microsoft-Windows-Power-Troubleshooter / Event ID 1 (сон или гибернация).
+The local setup uses a Task Scheduler task named `Night Light Refresh`:
 
-Запускается от текущего пользователя без повышения прав, только при наличии
-его сеанса. Не будит компьютер. Настройки задачи сохранены в `scheduled-task.xml`.
-Файл `night-light-toggle.exe` должен оставаться по текущему пути.
+- Runs 10 seconds after the current user signs in to Windows.
+- Runs 10 seconds after a wake event: System / Microsoft-Windows-Power-Troubleshooter / Event ID 1 (sleep or hibernation).
 
-Удаление автоматического запуска:
+The task runs as the current user without elevated privileges and requires an
+existing user session. It does not wake the computer. The local task configuration
+is saved in `scheduled-task.xml`, which is excluded from this repository.
+The executable must remain at the path configured in the task.
+
+To remove automatic startup:
 
 ```powershell
 Unregister-ScheduledTask -TaskName 'Night Light Refresh' -Confirm:$false
 ```
 
-## Сборка
+## Build
 
 ```powershell
 cargo build --release --locked
 Copy-Item target\release\night-light-toggle.exe .\night-light-toggle.exe
 ```
 
-Требуются Rust stable (MSVC), C++ Build Tools и Windows SDK.
+Requires Rust stable with the MSVC toolchain, C++ Build Tools, and the Windows SDK.
 
-## Проверка
+## Validation
 
 ```powershell
 cargo clippy --all-targets --locked -- -D warnings
 cargo test --release --locked --test windows_smoke -- --ignored --nocapture
 ```
 
-Интеграционный тест проверяет фазу выключения, итоговое включение и завершение
-процесса при обоих исходных состояниях. Он временно меняет ночной свет,
-затем восстанавливает исходное состояние. Расписание и интенсивность должны
-остаться неизменными. Тест не измеряет фактический цвет мониторов.
+The integration test checks the disabled phase, the final enabled state, and
+process termination from both initial states. It temporarily changes Night light,
+then restores the original state. The schedule and intensity must remain unchanged.
+The test does not measure the actual colors displayed by the monitors.
 
-Для доступа к Night light используется `win-nightlight-lib` 0.2.0.
-Она работает с недокументированным форматом CloudStore; совместимость с будущими
-версиями Windows не гарантируется. Прочитанное состояние — настройка Windows,
-а не измерение фактического цвета каждого монитора.
+Night light access uses `win-nightlight-lib` 0.2.0. It relies on the undocumented
+CloudStore format, so compatibility with future Windows versions is not guaranteed.
+The reported state represents the Windows setting, not the actual color output of
+each monitor.
