@@ -12,18 +12,18 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     sleep(Duration::from_secs(1));
     nightlight.set_active(true)?;
     if !nightlight.read_state()?.is_active() {
-        return Err("Windows не сохранила новое состояние ночного света.".into());
+        return Err("Windows did not save the new Night light state.".into());
     }
     Ok(())
 }
 
 fn main() {
     if let Err(error) = run() {
-        let text: Vec<u16> = format!("Не удалось обновить ночной свет.\n\n{error}")
+        let text: Vec<u16> = format!("Failed to refresh Night light.\n\n{error}")
             .encode_utf16()
             .chain(Some(0))
             .collect();
-        let title: Vec<u16> = "Ночной свет".encode_utf16().chain(Some(0)).collect();
+        let title: Vec<u16> = "Night Light Toggle".encode_utf16().chain(Some(0)).collect();
         // Both UTF-16 buffers remain alive throughout the modal call.
         unsafe {
             MessageBoxW(
